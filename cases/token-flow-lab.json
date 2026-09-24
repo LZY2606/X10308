@@ -1,0 +1,283 @@
+{
+  "case_id": "token-flow-lab",
+  "domain": "令牌流网：Petri net 可达状态、覆盖关系与反例路径",
+  "title": "流程建模小组的令牌流实验室",
+  "narrative": "流程建模小组导入 place、transition、加权 arc、初始 marking 和容量约束，探索目标 marking 与死锁候选；随后在自环、并发、容量边界、抑制 arc、无界增长、同图不同 marking 与预算截断上重放反例并进行分支裁定。",
+  "version": "1.0.0",
+  "units": {
+    "tokens": "token",
+    "capacity": "token",
+    "coordinates": "grid-unit@basis:svg-px-scale-40"
+  },
+  "materials": {
+    "net": [
+      {
+        "version": 1,
+        "title": "令牌流实验室原模型 v1",
+        "raw": {
+          "schema": "tokenflow.net/v1",
+          "net_id": "net-token-flow-lab",
+          "net_name": "令牌流实验室",
+          "rules_version": "rules-enablement-v1",
+          "places": [
+            {"id": "p_pool", "name": "原料池", "capacity": {"raw": "inf token", "unit": "token"},
+             "x": {"raw": "1", "basis": "grid"}, "y": {"raw": "1", "basis": "grid"}},
+            {"id": "p_buffer", "name": "有限缓冲", "capacity": {"raw": "2 token", "unit": "token"},
+             "x": {"raw": "4", "basis": "grid"}, "y": {"raw": "1", "basis": "grid"}},
+            {"id": "p_gate", "name": "闸门", "capacity": {"raw": "2 token", "unit": "token"},
+             "x": {"raw": "2.5", "basis": "grid"}, "y": {"raw": "3", "basis": "grid"}},
+            {"id": "p_tank", "name": "无界储罐", "capacity": {"raw": "N/A token", "unit": "token"},
+             "x": {"raw": "7", "basis": "grid"}, "y": {"raw": "1", "basis": "grid"}},
+            {"id": "p_arm", "name": "机械臂", "capacity": {"raw": "6 token", "unit": "token"},
+             "x": {"raw": "1", "basis": "grid"}, "y": {"raw": "3", "basis": "grid"}},
+            {"id": "p_done", "name": "成品", "capacity": {"raw": "inf token", "unit": "token"},
+             "x": {"raw": "5.5", "basis": "grid"}, "y": {"raw": "3", "basis": "grid"}}
+          ],
+          "transitions": [
+            {"id": "t_refill", "name": "补充原料(自环)",
+             "x": {"raw": "1", "basis": "grid"}, "y": {"raw": "-0.7", "basis": "grid"}},
+            {"id": "t_produce", "name": "并发生产A",
+             "x": {"raw": "2.5", "basis": "grid"}, "y": {"raw": "1", "basis": "grid"}},
+            {"id": "t_pump", "name": "无界泵送",
+             "x": {"raw": "5.5", "basis": "grid"}, "y": {"raw": "1", "basis": "grid"}},
+            {"id": "t_armgate", "name": "抑制锁定(装臂关门)",
+             "x": {"raw": "1", "basis": "grid"}, "y": {"raw": "4.5", "basis": "grid"}},
+            {"id": "t_assemble", "name": "容量边界组装",
+             "x": {"raw": "4", "basis": "grid"}, "y": {"raw": "3", "basis": "grid"}}
+          ],
+          "arcs": [
+            {"id": "a_refill_in", "kind": "input", "src": "p_pool", "dst": "t_refill",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_refill_out", "kind": "output", "src": "t_refill", "dst": "p_pool",
+             "weight": {"raw": "2 token", "unit": "token"}},
+
+            {"id": "a_produce_pool", "kind": "input", "src": "p_pool", "dst": "t_produce",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_produce_gate", "kind": "input", "src": "p_gate", "dst": "t_produce",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_produce_buf", "kind": "output", "src": "t_produce", "dst": "p_buffer",
+             "weight": {"raw": "1 token", "unit": "token"}},
+
+            {"id": "a_pump_buf", "kind": "input", "src": "p_buffer", "dst": "t_pump",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_pump_tank", "kind": "output", "src": "t_pump", "dst": "p_tank",
+             "weight": {"raw": "1 token", "unit": "token"}},
+
+            {"id": "a_armgate_arm", "kind": "input", "src": "p_arm", "dst": "t_armgate",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_armgate_tank_inh", "kind": "inhibitor", "src": "p_tank", "dst": "t_armgate",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_armgate_gate", "kind": "input", "src": "p_gate", "dst": "t_armgate",
+             "weight": {"raw": "1 token", "unit": "token"}},
+
+            {"id": "a_assemble_buf", "kind": "input", "src": "p_buffer", "dst": "t_assemble",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_assemble_gate", "kind": "input", "src": "p_gate", "dst": "t_assemble",
+             "weight": {"raw": "1 token", "unit": "token"}},
+            {"id": "a_assemble_done", "kind": "output", "src": "t_assemble", "dst": "p_done",
+             "weight": {"raw": "1 token", "unit": "token"}}
+          ]
+        }
+      },
+      {
+        "version": 2,
+        "title": "源数据局部改动 v2：p_buffer 容量 2 -> 3（仅影响容量边界局部依赖）",
+        "supersedes": "net-token-flow-lab@1",
+        "raw_patch": {"place": "p_buffer", "capacity": {"raw": "3 token", "unit": "token"}}
+      }
+    ],
+    "marking": [
+      {
+        "version": 1,
+        "title": "初始 marking v1：闸门开启，可探索目标死锁",
+        "raw": {
+          "schema": "tokenflow.marking/v1",
+          "marking_id": "mark-lab",
+          "net_id": "net-token-flow-lab",
+          "basis": "token",
+          "entries": [
+            {"place_id": "p_pool",   "tokens": {"raw": "2 token", "unit": "token"}},
+            {"place_id": "p_buffer", "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_gate",   "tokens": {"raw": "2 token", "unit": "token"}},
+            {"place_id": "p_tank",   "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_arm",    "tokens": {"raw": "4 token", "unit": "token"}},
+            {"place_id": "p_done",   "tokens": {"raw": "0 token", "unit": "token"}}
+          ]
+        }
+      },
+      {
+        "version": 2,
+        "title": "相同图不同 marking v2：闸门关闭、储罐有 token，立即死锁",
+        "raw": {
+          "schema": "tokenflow.marking/v1",
+          "marking_id": "mark-lab",
+          "net_id": "net-token-flow-lab",
+          "basis": "token",
+          "entries": [
+            {"place_id": "p_pool",   "tokens": {"raw": "2 token", "unit": "token"}},
+            {"place_id": "p_buffer", "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_gate",   "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_tank",   "tokens": {"raw": "1 token", "unit": "token"}},
+            {"place_id": "p_arm",    "tokens": {"raw": "4 token", "unit": "token"}},
+            {"place_id": "p_done",   "tokens": {"raw": "0 token", "unit": "token"}}
+          ]
+        }
+      },
+      {
+        "version": 3,
+        "title": "局部源改动 v3：原料池仅 1 token（只影响依赖它的分支）",
+        "supersedes": "mark-lab@2",
+        "raw": {
+          "schema": "tokenflow.marking/v1",
+          "marking_id": "mark-lab",
+          "net_id": "net-token-flow-lab",
+          "basis": "token",
+          "entries": [
+            {"place_id": "p_pool",   "tokens": {"raw": "1 token", "unit": "token"}},
+            {"place_id": "p_buffer", "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_gate",   "tokens": {"raw": "0 token", "unit": "token"}},
+            {"place_id": "p_tank",   "tokens": {"raw": "1 token", "unit": "token"}},
+            {"place_id": "p_arm",    "tokens": {"raw": "4 token", "unit": "token"}},
+            {"place_id": "p_done",   "tokens": {"raw": "0 token", "unit": "token"}}
+          ]
+        }
+      }
+    ],
+    "rules": [
+      {
+        "version": 1,
+        "id": "rules-enablement-v1",
+        "title": "enablement 规则 v1：输入 + 抑制 + 容量三条件合取",
+        "raw": {
+          "schema": "tokenflow.rules/v1",
+          "rules_id": "rules-enablement",
+          "version": 1,
+          "enablement": {
+            "input_clause": "all weighted input arcs satisfied",
+            "inhibitor_clause": "all inhibitor thresholds strictly below weight",
+            "capacity_clause": "successor marking within finite capacities"
+          },
+          "canonicalization": "per-place token counts; markings with different tokens are never merged",
+          "budget_exhaustion": "return unknown and retain frontier"
+        }
+      },
+      {
+        "version": 2,
+        "id": "rules-enablement-v2",
+        "title": "参数修订：enablement 规则 v2（容量子句改为严格小于容量上限）",
+        "supersedes": "rules-enablement-v1",
+        "raw": {
+          "schema": "tokenflow.rules/v1",
+          "rules_id": "rules-enablement",
+          "version": 2,
+          "enablement": {
+            "input_clause": "all weighted input arcs satisfied",
+            "inhibitor_clause": "all inhibitor thresholds strictly below weight",
+            "capacity_clause": "strictly-below revision: successor must be < finite capacity"
+          },
+          "canonicalization": "per-place token counts; markings with different tokens are never merged",
+          "budget_exhaustion": "return unknown and retain frontier",
+          "revision_note": "this is a deliberate conflicting parameter revision; legacy v1 conclusions are invalidated only where they depend on rules-enablement"
+        }
+      }
+    ],
+    "strategy": [
+      {
+        "version": 1,
+        "id": "strategy-bfs-v1",
+        "title": "探索策略 v1：BFS，fire 预算 200 / state 预算 200",
+        "raw": {
+          "schema": "tokenflow.strategy/v1",
+          "strategy_id": "strategy-bfs",
+          "version": 1,
+          "strategy": "bfs",
+          "fire_budget": 200,
+          "state_budget": 200,
+          "truncation_budget": {"fire_budget": 200, "state_budget": 200},
+          "note": "探索策略和截断预算一起版本化"
+        }
+      },
+      {
+        "version": 2,
+        "id": "strategy-bfs-v2",
+        "title": "截断预算修订 v2：fire 预算 3，专门制造截断 frontier",
+        "supersedes": "strategy-bfs-v1",
+        "raw": {
+          "schema": "tokenflow.strategy/v1",
+          "strategy_id": "strategy-bfs",
+          "version": 2,
+          "strategy": "bfs",
+          "fire_budget": 3,
+          "state_budget": 200,
+          "truncation_budget": {"fire_budget": 3, "state_budget": 200},
+          "note": "预算耗尽必须返回未知并保留 frontier"
+        }
+      }
+    ]
+  },
+  "scenarios": {
+    "self_loop":          {"id": "ce-self-loop",      "title": "自环：t_refill 边消耗边补回 p_pool，自环后 marking 净变化为 +1", "witness_transition": "t_refill", "witness_place": "p_pool"},
+    "concurrency":        {"id": "ce-concurrency",    "title": "并发 transition：多个 transition 在同一 marking 同时合法", "expect_pair": ["t_refill", "t_produce"]},
+    "capacity_boundary":  {"id": "ce-capacity",       "title": "容量边界：p_buffer=2 时 t_produce 因容量子句失能", "block_place": "p_buffer", "block_code": "capacity_exceeded"},
+    "inhibitor":          {"id": "ce-inhibitor",      "title": "抑制 arc：p_tank>=1 时 t_armgate 被抑制", "block_place": "p_tank", "block_code": "inhibitor_blocked"},
+    "unbounded_growth":   {"id": "ce-unbounded",      "title": "无界增长：重复 t_refill+t_produce+t_pump 后 p_tank 覆盖任意目标，进入 omega", "omega_place": "p_tank"},
+    "same_graph_diff_marking": {"id": "ce-diffmark",  "title": "相同图不同 marking：marking v2 立即死锁，canonical key 不同", "marking_version": 2},
+    "budget_truncation":  {"id": "ce-truncation",     "title": "预算截断：fire 预算 3 耗尽，状态未知且 frontier 保留", "strategy_version": 2}
+  },
+  "steps": [
+    {"op": "import_materials", "note": "初始导入：原模型、节点身份、arc 权重、初始 token、容量、探索策略和截断预算全部版本化；容量 N/A 留在原位置并附诊断"},
+    {"op": "branch", "id": "b-main", "title": "主复核分支", "pins": {"net": 1, "marking": 1, "rules": 1, "strategy": 1}},
+    {"op": "interpret", "branch": "b-main", "note": "派生层规范化：保留原始表示，N/A 容量 => 无界 + 诊断"},
+    {"op": "explore", "branch": "b-main",
+     "target": {"p_buffer": 2, "p_tank": 1, "p_done": 1},
+     "assert": {"has_concurrency": true, "deadlocks_ge": 1, "omega_place": "p_tank", "coverable": true}},
+    {"op": "archive_scenario", "branch": "b-main", "scenario": "self_loop"},
+    {"op": "archive_scenario", "branch": "b-main", "scenario": "concurrency"},
+    {"op": "archive_scenario", "branch": "b-main", "scenario": "capacity_boundary"},
+    {"op": "archive_scenario", "branch": "b-main", "scenario": "inhibitor"},
+    {"op": "archive_scenario", "branch": "b-main", "scenario": "unbounded_growth"},
+
+    {"op": "branch", "id": "b-altmark", "title": "第二分支：相同图不同 marking，检验 enablement 三条件与 canonicalization",
+     "pins": {"net": 1, "marking": 2, "rules": 1, "strategy": 1}},
+    {"op": "interpret", "branch": "b-altmark"},
+    {"op": "explore", "branch": "b-altmark",
+     "assert": {"deadlocks_ge": 1, "root_deadlock": true, "root_block_codes": ["input_unsatisfied", "inhibitor_blocked"]}},
+    {"op": "archive_scenario", "branch": "b-altmark", "scenario": "same_graph_diff_marking"},
+
+    {"op": "branch", "id": "b-budget", "title": "截断预算分支", "pins": {"net": 1, "marking": 1, "rules": 1, "strategy": 2}},
+    {"op": "interpret", "branch": "b-budget"},
+    {"op": "explore", "branch": "b-budget",
+     "assert": {"status": "truncated", "fires_used": 3, "frontier_ge": 1}},
+    {"op": "archive_scenario", "branch": "b-budget", "scenario": "budget_truncation"},
+
+    {"op": "parameter_revision", "material": "rules", "version": 2, "title": "参数修订：enablement 规则 v2",
+     "reason_code": "parameter_revision",
+     "assert_invalidation": {"includes_prefix": ["model:", "run:"], "branch_scoped": false, "keeps_other_suppliers": true}},
+
+    {"op": "branch", "id": "b-local", "title": "局部依赖源改动分支", "pins": {"net": 1, "marking": 3, "rules": 1, "strategy": 1}},
+    {"op": "interpret", "branch": "b-local"},
+    {"op": "local_source_change", "material": "marking", "version": 3,
+     "reason_code": "local_source_change",
+     "assert_invalidation": {"scoped_to_branch": "b-local", "must_not_include_branch": "b-main"}},
+    {"op": "explore", "branch": "b-local", "assert": {"root_block_codes_contains": "input_unsatisfied"}},
+
+    {"op": "human_decision", "branch": "b-main", "counterexample": "ce-unbounded", "action": "accept",
+     "note": "互相冲突的人工决定（之一）：接受无界增长结论"},
+    {"op": "human_decision_conflict", "branch": "b-main", "counterexample": "ce-unbounded",
+     "first_actor": "reviewer-qin", "first_action": "accept",
+     "second_actor": "reviewer-zhao", "second_action": "reject", "stale_rev": 1,
+     "note": "两个窗口同时保存：后提交者看到版本冲突与双方差异；冲突尝试也被存档"},
+    {"op": "undo_decision", "branch": "b-main", "counterexample": "ce-unbounded",
+     "note": "撤销裁定并恢复前一分支状态（verdict=pending，rev 递增）"},
+    {"op": "human_decision", "branch": "b-main", "counterexample": "ce-capacity", "action": "reject",
+     "note": "互相冲突的人工决定（采纳侧）：容量边界反例被否定，未采纳结果同样保留"}
+  ],
+  "traceability": {
+    "final_diff_questions": [
+      "哪条材料（material id + version）改变了 p_buffer 的容量语义？",
+      "哪版规则（rules-enablement-v1/v2）决定了容量子句？",
+      "哪次人工决定（decision id、actor、rev）造成了无界增长反例的裁定差异？",
+      "预算截断时保留了哪些 frontier 项（稳定 state seq + transition id）？"
+    ]
+  }
+}
