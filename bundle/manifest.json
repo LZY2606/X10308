@@ -1,0 +1,66 @@
+{
+  "case_id": "tokenflow-pack",
+  "title": "令牌流网：Petri net 可达状态、覆盖关系与反例路径",
+  "narrative": "流程建模小组导入 place、transition、加权 arc、初始 marking 与容量约束，探索目标 marking 与死锁候选。先核对版本化基线，再触发边界组合，最后在复核页面完成分支裁定与冲突处理。",
+  "steps": [
+    {
+      "order": 1,
+      "kind": "initial_import",
+      "file": "case-v1-baseline.json",
+      "revision": "v1",
+      "checks": [
+        "原模型",
+        "节点身份",
+        "arc 权重",
+        "初始 token",
+        "容量",
+        "探索策略",
+        "截断预算"
+      ],
+      "situations": [
+        "self_loop",
+        "concurrency",
+        "capacity_boundary",
+        "inhibitor_arc",
+        "unbounded_growth",
+        "samegraph_a",
+        "samegraph_b",
+        "budget_cut"
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "parameter_revision",
+      "file": "case-v2-params.json",
+      "revision": "v2",
+      "change": "truncation_budget 60->90（单一参数版本变化）",
+      "invalidation_scope": "所有依赖 params 版本的候选（全部情形），旧分支结论保留可读"
+    },
+    {
+      "order": 3,
+      "kind": "local_source_revision",
+      "file": "case-v3-source.json",
+      "revision": "v3",
+      "change": "仅 concurrency 的 arc ca1 权重 1->2（一个直接来源）",
+      "invalidation_scope": "仅 net hash 变化的 concurrency 情形；其它情形结论复用"
+    },
+    {
+      "order": 4,
+      "kind": "conflicting_human_decisions",
+      "file": null,
+      "revision": "v1",
+      "change": "两个复核窗口基于同一 branch version 接受/否定同一候选",
+      "expectation": "后提交者收到版本冲突，界面展示双方差异；先提交结论不被覆盖"
+    }
+  ],
+  "rules": {
+    "enablement": "enabled iff inputs satisfied AND inhibitor not blocking AND post-fire capacity respected",
+    "canonicalization": "markings with different tokens are never merged",
+    "budget_exhausted": "verdict unknown and frontier retained"
+  },
+  "units": {
+    "tokens": "token",
+    "capacities": "capacity",
+    "coordinates": "px on doc-coordinate-system/1"
+  }
+}

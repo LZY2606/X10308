@@ -1,0 +1,232 @@
+{
+  "schema": "tflocal.case/1",
+  "doc_id": "tokenflow-pack",
+  "revision": "v1",
+  "title": "令牌流网案例包：Petri net 可达状态、覆盖关系与反例路径",
+  "coord_basis": "doc-coordinate-system/1",
+  "params": {
+    "version": "explore-baseline-v1",
+    "strategy": "bfs",
+    "budget": 60,
+    "inhibitors_enabled": true,
+    "parser_version": "parser-1.0",
+    "notes": "基线：输入+抑制+容量三条件 enablement；BFS；全局触发预算 60"
+  },
+  "scenarios": [
+    {
+      "id": "self_loop",
+      "name": "自环 self-loop",
+      "description": "t_ping 既是 place ready 的输入又是输出：触发后 marking 不变。验证 canonicalization 不会为同一 marking 制造重复状态，marking 路径上出现自环边但不产生新节点。",
+      "places": [
+        {"id": "p_ready", "name": "ready", "coord": {"x": 120, "y": 100, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "p_done", "name": "done", "coord": {"x": 120, "y": 260, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "t_ping", "name": "ping(自环)", "coord": {"x": 360, "y": 100, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_finish", "name": "finish", "coord": {"x": 360, "y": 260, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "a1", "from": "p_ready", "to": "t_ping", "kind": "normal", "raw_weight": "1"},
+        {"id": "a2", "from": "t_ping", "to": "p_ready", "kind": "normal", "raw_weight": "1"},
+        {"id": "a3", "from": "p_ready", "to": "t_finish", "kind": "normal", "raw_weight": "1"},
+        {"id": "a4", "from": "t_finish", "to": "p_done", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "p_ready", "raw": "1", "unit": "token"}
+      ],
+      "goal": {"p_done": "1"}
+    },
+    {
+      "id": "concurrency",
+      "name": "并发 transition interleaving",
+      "description": "两个共享 token 的独立任务。t_a/t_b 各自需要同一资源 token，产生交错序列与死锁候选：资源被消耗后两条分支互相阻断。",
+      "places": [
+        {"id": "c_res", "name": "shared-resource", "coord": {"x": 100, "y": 180, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "c_idle", "name": "idle", "coord": {"x": 340, "y": 60, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "c_busy_a", "name": "busy-A", "coord": {"x": 620, "y": 60, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "c_busy_b", "name": "busy-B", "coord": {"x": 620, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "c_done", "name": "committed", "coord": {"x": 340, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "t_a", "name": "acquire-A", "coord": {"x": 480, "y": 60, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_b", "name": "acquire-B", "coord": {"x": 480, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_rel", "name": "release-commit", "coord": {"x": 340, "y": 180, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "ca1", "from": "c_res", "to": "t_a", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca2", "from": "c_idle", "to": "t_a", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca3", "from": "t_a", "to": "c_busy_a", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca4", "from": "c_res", "to": "t_b", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca5", "from": "c_idle", "to": "t_b", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca6", "from": "t_b", "to": "c_busy_b", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca7", "from": "c_busy_a", "to": "t_rel", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca8", "from": "c_busy_b", "to": "t_rel", "kind": "normal", "raw_weight": "1"},
+        {"id": "ca9", "from": "t_rel", "to": "c_done", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "c_res", "raw": "1", "unit": "token"},
+        {"place_id": "c_idle", "raw": "1", "unit": "token"}
+      ],
+      "goal": {"c_done": "1"}
+    },
+    {
+      "id": "capacity_boundary",
+      "name": "容量边界 capacity boundary",
+      "description": "buffer 容量上限为 2 个 token；t_put 在已满时因容量条件不可触发，t_get 取出后恢复可触发。容量使用原始字符串并携带 capacity 单位；故意保留一条无法转换的初始 token 原始值，派生层附诊断而不删除。",
+      "places": [
+        {"id": "k_src", "name": "source", "coord": {"x": 100, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"},
+        "capacity": null},
+        {"id": "k_buf", "name": "buffer(cap=2)", "coord": {"x": 380, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"},
+        "capacity": {"place_id": "k_buf", "raw": "2", "unit": "capacity"}},
+        {"id": "k_sink", "name": "sink", "coord": {"x": 660, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "t_put", "name": "put", "coord": {"x": 240, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_get", "name": "get", "coord": {"x": 520, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "ka1", "from": "k_src", "to": "t_put", "kind": "normal", "raw_weight": "1"},
+        {"id": "ka2", "from": "t_put", "to": "k_buf", "kind": "normal", "raw_weight": "1"},
+        {"id": "ka3", "from": "k_buf", "to": "t_get", "kind": "normal", "raw_weight": "1"},
+        {"id": "ka4", "from": "t_get", "to": "k_sink", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "k_src", "raw": "5", "unit": "token"},
+        {"place_id": "k_buf", "raw": "1", "unit": "token"},
+        {"place_id": "k_sink", "raw": "TWO", "unit": "token"}
+      ],
+      "goal": {"k_sink": "3"}
+    },
+    {
+      "id": "inhibitor_arc",
+      "name": "抑制 arc 死锁",
+      "description": "i_lock 非空时抑制弧阻断 t_use；只有 t_reset 清空 lock 才能继续。当 i_pending=1 且 lock=1 时 t_use 被抑制、t_reset 又因 pending 为空不可触发，形成明确死锁候选。enablement 同时检查输入、抑制与容量。",
+      "places": [
+        {"id": "i_pending", "name": "pending", "coord": {"x": 120, "y": 120, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "i_lock", "name": "lock", "coord": {"x": 120, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "i_out", "name": "processed", "coord": {"x": 640, "y": 120, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "t_use", "name": "use(blocked-by-inhibitor)", "coord": {"x": 380, "y": 120, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_reset", "name": "reset-lock", "coord": {"x": 380, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_trap", "name": "trap-set", "coord": {"x": 380, "y": 220, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "ia1", "from": "i_pending", "to": "t_use", "kind": "normal", "raw_weight": "1"},
+        {"id": "ih1", "from": "i_lock", "to": "t_use", "kind": "inhibitor", "raw_weight": "1"},
+        {"id": "ia2", "from": "t_use", "to": "i_out", "kind": "normal", "raw_weight": "1"},
+        {"id": "ia3", "from": "i_lock", "to": "t_reset", "kind": "normal", "raw_weight": "1"},
+        {"id": "ia4", "from": "t_reset", "to": "i_lock", "kind": "normal", "raw_weight": "1"},
+        {"id": "ia5", "from": "i_pending", "to": "t_trap", "kind": "normal", "raw_weight": "1"},
+        {"id": "ia6", "from": "t_trap", "to": "i_lock", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "i_pending", "raw": "1", "unit": "token"},
+        {"place_id": "i_lock", "raw": "0", "unit": "token"}
+      ],
+      "goal": {"i_out": "1"}
+    },
+    {
+      "id": "unbounded_growth",
+      "name": "无界增长 Karp-Miller ω",
+      "description": "t_inc 每触发一次 net+1 且 free 保持自循环；精确 BFS 在预算处截断为未知并保留 frontier，覆盖树经 Karp-Miller 加速把 n_net 提升为 ω，得到覆盖关系与无界结论。",
+      "places": [
+        {"id": "u_free", "name": "free", "coord": {"x": 120, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "u_net", "name": "network-tokens", "coord": {"x": 560, "y": 140, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "t_inc", "name": "increment", "coord": {"x": 340, "y": 100, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "t_drop", "name": "consume-one", "coord": {"x": 340, "y": 220, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "ua1", "from": "u_free", "to": "t_inc", "kind": "normal", "raw_weight": "1"},
+        {"id": "ua2", "from": "t_inc", "to": "u_free", "kind": "normal", "raw_weight": "1"},
+        {"id": "ua3", "from": "t_inc", "to": "u_net", "kind": "normal", "raw_weight": "1"},
+        {"id": "ua4", "from": "u_net", "to": "t_drop", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "u_free", "raw": "1", "unit": "token"},
+        {"place_id": "u_net", "raw": "0", "unit": "token"}
+      ],
+      "goal": {"u_net": "5"}
+    },
+    {
+      "id": "samegraph_a",
+      "name": "相同图不同 marking A",
+      "description": "与 samegraph_b 拥有完全相同的节点身份和加权 arc，仅初始 marking 不同。两个解释分支的状态必须保持不同（canonicalization 不合并 token 不同的 marking）。A 初始为空、目标不可达。",
+      "places": [
+        {"id": "sg_in", "name": "in", "coord": {"x": 120, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_mid", "name": "mid", "coord": {"x": 400, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_out", "name": "out", "coord": {"x": 680, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "sg_t1", "name": "step1", "coord": {"x": 260, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_t2", "name": "step2", "coord": {"x": 540, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "sga1", "from": "sg_in", "to": "sg_t1", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga2", "from": "sg_t1", "to": "sg_mid", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga3", "from": "sg_mid", "to": "sg_t2", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga4", "from": "sg_t2", "to": "sg_out", "kind": "normal", "raw_weight": "2"}
+      ],
+      "initial_tokens": [
+        {"place_id": "sg_in", "raw": "0", "unit": "token"}
+      ],
+      "goal": {"sg_out": "2"}
+    },
+    {
+      "id": "samegraph_b",
+      "name": "相同图不同 marking B",
+      "description": "节点身份与加权 arc 与 samegraph_a 完全一致，但 sg_in 初始有 2 个 token：目标可达。相同图 + 不同初始 token，必须产生不同状态与结论。",
+      "places": [
+        {"id": "sg_in", "name": "in", "coord": {"x": 120, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_mid", "name": "mid", "coord": {"x": 400, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_out", "name": "out", "coord": {"x": 680, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "sg_t1", "name": "step1", "coord": {"x": 260, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "sg_t2", "name": "step2", "coord": {"x": 540, "y": 160, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "sga1", "from": "sg_in", "to": "sg_t1", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga2", "from": "sg_t1", "to": "sg_mid", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga3", "from": "sg_mid", "to": "sg_t2", "kind": "normal", "raw_weight": "2"},
+        {"id": "sga4", "from": "sg_t2", "to": "sg_out", "kind": "normal", "raw_weight": "2"}
+      ],
+      "initial_tokens": [
+        {"place_id": "sg_in", "raw": "2", "unit": "token"}
+      ],
+      "goal": {"sg_out": "2"}
+    },
+    {
+      "id": "budget_cut",
+      "name": "预算截断 truncated frontier",
+      "description": "二维无界增长网，场景级 budget_override=12 远小于状态空间。预算耗尽时结论必须为 unknown，未展开的状态以 frontier 保留；提高预算（参数修订）后才能继续。",
+      "places": [
+        {"id": "b_x", "name": "x", "coord": {"x": 120, "y": 120, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "b_y", "name": "y", "coord": {"x": 120, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "b_done", "name": "far-goal", "coord": {"x": 660, "y": 210, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "transitions": [
+        {"id": "b_tx", "name": "grow-x", "coord": {"x": 360, "y": 120, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "b_ty", "name": "grow-y", "coord": {"x": 360, "y": 300, "unit": "px", "basis": "doc-coordinate-system/1"}},
+        {"id": "b_fin", "name": "reach-far", "coord": {"x": 520, "y": 210, "unit": "px", "basis": "doc-coordinate-system/1"}}
+      ],
+      "arcs": [
+        {"id": "ba1", "from": "b_x", "to": "b_tx", "kind": "normal", "raw_weight": "1"},
+        {"id": "ba2", "from": "b_tx", "to": "b_x", "kind": "normal", "raw_weight": "1"},
+        {"id": "ba3", "from": "b_y", "to": "b_ty", "kind": "normal", "raw_weight": "1"},
+        {"id": "ba4", "from": "b_ty", "to": "b_y", "kind": "normal", "raw_weight": "1"},
+        {"id": "ba5", "from": "b_x", "to": "b_fin", "kind": "normal", "raw_weight": "10"},
+        {"id": "ba6", "from": "b_y", "to": "b_fin", "kind": "normal", "raw_weight": "10"},
+        {"id": "ba7", "from": "b_fin", "to": "b_done", "kind": "normal", "raw_weight": "1"}
+      ],
+      "initial_tokens": [
+        {"place_id": "b_x", "raw": "1", "unit": "token"},
+        {"place_id": "b_y", "raw": "1", "unit": "token"}
+      ],
+      "goal": {"b_done": "1"},
+      "budget_override": 12
+    }
+  ]
+}
