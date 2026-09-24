@@ -1,0 +1,425 @@
+{
+  "schema": "tokenflow/case@1",
+  "case_id": "tokenflow-offline-01",
+  "case_name": "令牌流网：可达状态、覆盖关系与反例路径",
+  "revision": "v1",
+  "parent_revision": "",
+  "revision_note": "初始基线：原模型、节点身份、arc 权重、初始 token、容量、探索策略与截断预算全部版本化",
+  "rule_version": "enablement=input+inhibitor+capacity@1; canonical=per-place-tokens@1; budget=unknown+frontier@1",
+  "coordinate_basis": "canvas px, origin top-left",
+  "places": [
+    {
+      "id": "p_start",
+      "name": "启动缓冲",
+      "capacity": null,
+      "unit": "token",
+      "x": 80,
+      "y": 120
+    },
+    {
+      "id": "p_concur_a",
+      "name": "并发分支 A",
+      "capacity": 2,
+      "unit": "token",
+      "x": 260,
+      "y": 60
+    },
+    {
+      "id": "p_concur_b",
+      "name": "并发分支 B",
+      "capacity": 2,
+      "unit": "token",
+      "x": 260,
+      "y": 200
+    },
+    {
+      "id": "p_join",
+      "name": "汇合",
+      "capacity": null,
+      "unit": "token",
+      "x": 440,
+      "y": 130
+    },
+    {
+      "id": "p_loop",
+      "name": "循环池",
+      "capacity": 4,
+      "unit": "token",
+      "x": 80,
+      "y": 260
+    },
+    {
+      "id": "p_grow",
+      "name": "无界增长池",
+      "capacity": null,
+      "unit": "token",
+      "x": 440,
+      "y": 280
+    },
+    {
+      "id": "p_gate",
+      "name": "抑制门控",
+      "capacity": 1,
+      "unit": "token",
+      "x": 260,
+      "y": 340
+    },
+    {
+      "id": "p_sink",
+      "name": "容量边界库",
+      "capacity": 3,
+      "unit": "token",
+      "x": 620,
+      "y": 130
+    },
+    {
+      "id": "p_diag",
+      "name": "无法转换节点",
+      "capacity": "N/A",
+      "unit": "token",
+      "x": 620,
+      "y": 320
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t_split",
+      "name": "拆分",
+      "x": 170,
+      "y": 130
+    },
+    {
+      "id": "t_a",
+      "name": "并发任务 A",
+      "x": 350,
+      "y": 60
+    },
+    {
+      "id": "t_b",
+      "name": "并发任务 B",
+      "x": 350,
+      "y": 200
+    },
+    {
+      "id": "t_join",
+      "name": "汇合完成",
+      "x": 530,
+      "y": 130
+    },
+    {
+      "id": "t_selfloop",
+      "name": "自环检查",
+      "x": 170,
+      "y": 260
+    },
+    {
+      "id": "t_grow",
+      "name": "无界增长",
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "t_fill",
+      "name": "填充容量库",
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "t_drain",
+      "name": "泄放到门控",
+      "x": 620,
+      "y": 220
+    },
+    {
+      "id": "t_diag",
+      "name": "坏权重转换",
+      "x": 530,
+      "y": 380
+    }
+  ],
+  "arcs": [
+    {
+      "id": "a1",
+      "kind": "input",
+      "from": "p_start",
+      "to": "t_split",
+      "weight": 1
+    },
+    {
+      "id": "a2",
+      "kind": "output",
+      "from": "t_split",
+      "to": "p_concur_a",
+      "weight": 1
+    },
+    {
+      "id": "a3",
+      "kind": "output",
+      "from": "t_split",
+      "to": "p_concur_b",
+      "weight": 1
+    },
+    {
+      "id": "a4",
+      "kind": "input",
+      "from": "p_concur_a",
+      "to": "t_a",
+      "weight": 1
+    },
+    {
+      "id": "a5",
+      "kind": "input",
+      "from": "p_concur_b",
+      "to": "t_b",
+      "weight": 1
+    },
+    {
+      "id": "a6",
+      "kind": "output",
+      "from": "t_a",
+      "to": "p_join",
+      "weight": 1
+    },
+    {
+      "id": "a7",
+      "kind": "output",
+      "from": "t_b",
+      "to": "p_join",
+      "weight": 1
+    },
+    {
+      "id": "a8",
+      "kind": "input",
+      "from": "p_join",
+      "to": "t_join",
+      "weight": 2
+    },
+    {
+      "id": "a9",
+      "kind": "output",
+      "from": "t_join",
+      "to": "p_sink",
+      "weight": 2
+    },
+    {
+      "id": "a10",
+      "kind": "input",
+      "from": "p_loop",
+      "to": "t_selfloop",
+      "weight": 1
+    },
+    {
+      "id": "a11",
+      "kind": "output",
+      "from": "t_selfloop",
+      "to": "p_loop",
+      "weight": 1
+    },
+    {
+      "id": "a12",
+      "kind": "input",
+      "from": "p_start",
+      "to": "t_grow",
+      "weight": 1
+    },
+    {
+      "id": "a13",
+      "kind": "output",
+      "from": "t_grow",
+      "to": "p_grow",
+      "weight": 1
+    },
+    {
+      "id": "a14",
+      "kind": "output",
+      "from": "t_grow",
+      "to": "p_start",
+      "weight": 1
+    },
+    {
+      "id": "a15",
+      "kind": "input",
+      "from": "p_start",
+      "to": "t_grow",
+      "weight": 1
+    },
+    {
+      "id": "a16",
+      "kind": "input",
+      "from": "p_grow",
+      "to": "t_fill",
+      "weight": 1
+    },
+    {
+      "id": "a17",
+      "kind": "output",
+      "from": "t_fill",
+      "to": "p_sink",
+      "weight": 1
+    },
+    {
+      "id": "a18",
+      "kind": "input",
+      "from": "p_sink",
+      "to": "t_drain",
+      "weight": 1
+    },
+    {
+      "id": "a19",
+      "kind": "output",
+      "from": "t_drain",
+      "to": "p_gate",
+      "weight": 1
+    },
+    {
+      "id": "a20",
+      "kind": "inhibitor",
+      "from": "p_gate",
+      "to": "t_fill",
+      "weight": 1
+    },
+    {
+      "id": "a21",
+      "kind": "input",
+      "from": "p_diag",
+      "to": "t_diag",
+      "weight": "NaN"
+    }
+  ],
+  "initial_marking": [
+    {
+      "place": "p_start",
+      "tokens": 2
+    },
+    {
+      "place": "p_concur_a",
+      "tokens": 0
+    },
+    {
+      "place": "p_concur_b",
+      "tokens": 0
+    },
+    {
+      "place": "p_join",
+      "tokens": 0
+    },
+    {
+      "place": "p_loop",
+      "tokens": 1
+    },
+    {
+      "place": "p_grow",
+      "tokens": 0
+    },
+    {
+      "place": "p_gate",
+      "tokens": 0
+    },
+    {
+      "place": "p_sink",
+      "tokens": 0
+    }
+  ],
+  "goal_marking": [
+    {
+      "place": "p_start",
+      "tokens": 0
+    },
+    {
+      "place": "p_concur_a",
+      "tokens": 0
+    },
+    {
+      "place": "p_concur_b",
+      "tokens": 0
+    },
+    {
+      "place": "p_join",
+      "tokens": 2
+    },
+    {
+      "place": "p_loop",
+      "tokens": 1
+    },
+    {
+      "place": "p_grow",
+      "tokens": 0
+    },
+    {
+      "place": "p_gate",
+      "tokens": 0
+    },
+    {
+      "place": "p_sink",
+      "tokens": 2
+    }
+  ],
+  "alt_markings": [
+    {
+      "id": "m_deadlock",
+      "name": "相同图不同 marking：全局死锁候选",
+      "tokens": [
+        {
+          "place": "p_start",
+          "tokens": 0
+        },
+        {
+          "place": "p_concur_a",
+          "tokens": 0
+        },
+        {
+          "place": "p_concur_b",
+          "tokens": 0
+        },
+        {
+          "place": "p_join",
+          "tokens": 1
+        },
+        {
+          "place": "p_loop",
+          "tokens": 0
+        },
+        {
+          "place": "p_grow",
+          "tokens": 2
+        },
+        {
+          "place": "p_gate",
+          "tokens": 1
+        },
+        {
+          "place": "p_sink",
+          "tokens": 3
+        }
+      ]
+    }
+  ],
+  "params": {
+    "strategy": "bfs",
+    "budget": 8,
+    "max_candidates": 6,
+    "cover_budget": 10000
+  },
+  "narrative": [
+    {
+      "stage": "1-import",
+      "title": "初始导入与基线核对",
+      "detail": "流程建模小组导入 place、transition、加权 arc、初始 marking 与容量约束；审阅者核对节点身份、arc 权重、初始 token、容量、探索策略(bfs)与截断预算(8)均已版本化；p_diag 容量 N/A 与 a21 权重 NaN 无法转换，保留原位并附诊断，绝不因画图而丢弃。"
+    },
+    {
+      "stage": "2-boundary",
+      "title": "边界组合触发",
+      "detail": "自环(t_selfloop)、并发(t_a/t_b 汇合)、容量边界(p_sink cap=3)、抑制 arc(p_gate -o t_fill)、无界增长(t_grow/p_grow)、相同图不同 marking(m_deadlock)与预算截断(budget=8)逐一重放；每次留下输入片段、判定状态与受影响对象。"
+    },
+    {
+      "stage": "3-enablement",
+      "title": "enablement 与多候选",
+      "detail": "enablement 同时考虑输入、抑制与容量；状态 canonicalization 不合并 token 不同的 marking；预算耗尽返回 unknown 并保留 frontier；无法唯一决定时保留全部合法候选(如 t_a/t_b 的不同交织)。"
+    },
+    {
+      "stage": "4-review",
+      "title": "复核与裁定",
+      "detail": "在页面查看网络图、marking 路径、覆盖关系、死锁原因与被截断 frontier；接受/否定/参数调整均生成新事件，可撤销，回到旧事件恢复当时依赖版本与可见结论。"
+    }
+  ]
+}

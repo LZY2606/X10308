@@ -1,0 +1,25 @@
+{
+  "schema": "tokenflow/case@1",
+  "case_id": "tokenflow-offline-01",
+  "case_name": "令牌流网：可达状态、覆盖关系与反例路径",
+  "revision": "v2",
+  "parent_revision": "v1",
+  "revision_note": "参数修订：仅提高截断预算 8 -> 256，源数据（节点身份/arc 权重/token/容量）零改动；失效范围只限 param:budget 依赖",
+  "rule_version": "enablement=input+inhibitor+capacity@1; canonical=per-place-tokens@1; budget=unknown+frontier@1",
+  "coordinate_basis": "canvas px, origin top-left",
+  "places": [],
+  "transitions": [],
+  "arcs": [],
+  "initial_marking": [],
+  "goal_marking": [],
+  "alt_markings": [],
+  "params": {
+    "strategy": "bfs",
+    "budget": 256,
+    "max_candidates": 6,
+    "cover_budget": 10000
+  },
+  "narrative": [
+    {"stage": "revise-param", "title": "参数修订（不替换旧结论）", "detail": "预算从 8 调整到 256 后新建分支；v1 的 unknown 结论与 frontier 原样保留，只标记由 param:budget 驱动的结论失效范围，不做全局静默替换。"}
+  ]
+}

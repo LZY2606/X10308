@@ -1,0 +1,32 @@
+{
+  "schema": "tokenflow/case@1",
+  "case_id": "tokenflow-offline-01",
+  "case_name": "令牌流网：可达状态、覆盖关系与反例路径",
+  "revision": "v3",
+  "parent_revision": "v2",
+  "revision_note": "局部源数据改动：仅把回流 arc a14(t_grow->p_start) 权重 1 -> 2，依赖该 arc 的候选/覆盖结论失效，其余仍有效",
+  "rule_version": "enablement=input+inhibitor+capacity@1; canonical=per-place-tokens@1; budget=unknown+frontier@1",
+  "coordinate_basis": "canvas px, origin top-left",
+  "places": [],
+  "transitions": [],
+  "arcs": [
+    {
+      "id": "a14",
+      "kind": "output",
+      "from": "t_grow",
+      "to": "p_start",
+      "weight": 2
+    }
+  ],
+  "initial_marking": [],
+  "goal_marking": [],
+  "alt_markings": [],
+  "params": {},
+  "narrative": [
+    {
+      "stage": "patch-source",
+      "title": "局部源数据补丁",
+      "detail": "唯一直接来源改动是 a14 权重；按依赖关系计算失效范围：引用 a14 的候选路径与受影响的无界见证标记 stale，未引用 a14 的容量边界、并发汇合、死锁候选与抑制判定仍可继续读取。"
+    }
+  ]
+}
