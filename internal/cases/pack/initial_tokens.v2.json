@@ -1,0 +1,42 @@
+{
+  "marking_id": "m1-deadlock-same-graph",
+  "label": "同一图、不同 marking：资源耗尽且哨兵已置位的死锁候选",
+  "unit": "token",
+  "tokens": [
+    {
+      "place": "p_ready",
+      "raw": "1",
+      "unit": "token"
+    },
+    {
+      "place": "p_pool",
+      "raw": "0",
+      "unit": "token"
+    },
+    {
+      "place": "p_buffer",
+      "raw": "0",
+      "unit": "token"
+    },
+    {
+      "place": "p_done",
+      "raw": "1",
+      "unit": "token"
+    },
+    {
+      "place": "p_guard",
+      "raw": "1",
+      "unit": "token"
+    },
+    {
+      "place": "p_loopctl",
+      "raw": "0",
+      "unit": "token"
+    },
+    {
+      "place": "p_sink",
+      "raw": "0",
+      "unit": "token"
+    }
+  ]
+}

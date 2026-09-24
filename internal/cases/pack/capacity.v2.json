@@ -1,0 +1,14 @@
+{
+  "capacity_id": "tf-capacity-v2-local",
+  "unit": "token",
+  "note": "局部依赖改动：只收紧 p_buffer 容量，依赖范围应仅命中引用 capacity 的结论",
+  "places": {
+    "p_ready": {"raw": "∞", "unit": "token"},
+    "p_pool": {"raw": "∞", "unit": "token"},
+    "p_buffer": {"raw": "1", "unit": "token"},
+    "p_done": {"raw": "∞", "unit": "token"},
+    "p_guard": {"raw": "1", "unit": "token"},
+    "p_loopctl": {"raw": "1", "unit": "token"},
+    "p_sink": {"raw": "∞", "unit": "token"}
+  }
+}

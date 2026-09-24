@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>令牌流网 · Petri net 可达性复核工作区</title>
+<link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>令牌流网 · 可达状态 / 覆盖关系 / 反例路径</h1>
+    <p class="sub">完全本地 · Go + SQLite + HTTP + SVG · 原模型/身份/权重/初始 token/容量/策略/预算全部版本化</p>
+  </div>
+  <div class="actions">
+    <button id="btn-load">载入仓库示例</button>
+    <button id="btn-export">导出归档</button>
+    <label class="filebtn">导入归档<input id="file-import" type="file" accept="application/json" hidden/></label>
+    <span id="rev-pill" class="pill">rev=–</span>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="left">
+    <section class="card">
+      <h2>叙事步骤</h2>
+      <ol id="narrative"></ol>
+    </section>
+    <section class="card">
+      <h2>分支（裁定线）</h2>
+      <div id="branches" class="stack"></div>
+      <button id="btn-fork" class="secondary">从当前分支新建分支</button>
+    </section>
+    <section class="card">
+      <h2>必验情形</h2>
+      <ul id="scenarios" class="scenarios"></ul>
+    </section>
+  </aside>
+
+  <section class="center">
+    <section class="card">
+      <div class="rowbetween">
+        <h2 id="branch-title">网络图</h2>
+        <div class="row">
+          <label>稳定身份 <input id="toggle-ids" type="checkbox" checked/></label>
+          <span id="svg-warn" class="warn" hidden>⚠ 存在未转换值（已保留原始表示与诊断）</span>
+        </div>
+      </div>
+      <div id="graph" class="graphbox"></div>
+      <div id="diags" class="diags"></div>
+    </section>
+
+    <section class="card">
+      <h2>探索（精确可达 / 覆盖树 / 枚举）</h2>
+      <div class="row wrap">
+        <label>问题
+          <select id="q-kind">
+            <option value="reachability">reachability（精确 BFS/DFS，多候选）</option>
+            <option value="coverability">coverability（覆盖树，无界/抑制安全）</option>
+            <option value="enumerate">enumerate（状态空间/死锁/frontier）</option>
+          </select>
+        </label>
+        <label>目标 marking(JSON)
+          <input id="q-goal" size="42" value='{"p_buffer":2,"p_ready":0,"p_pool":3,"p_loopctl":1}'/>
+        </label>
+        <button id="btn-run">运行</button>
+        <span id="run-status" class="pill"></span>
+      </div>
+      <div id="question-shortcuts" class="shortcuts"></div>
+      <div id="result" class="result"></div>
+    </section>
+
+    <section class="card">
+      <h2>候选与裁定（可撤销）</h2>
+      <div id="candidates" class="stack"></div>
+      <div id="adjudications" class="stack"></div>
+    </section>
+  </section>
+
+  <aside class="right">
+    <section class="card">
+      <h2>事件时间线（as-of 重放）</h2>
+      <div class="row">
+        <button id="btn-replay" class="secondary">重放到所选事件</button>
+        <button id="btn-latest" class="secondary">回到最新</button>
+      </div>
+      <ol id="events" class="events"></ol>
+      <pre id="replay-view" class="replay"></pre>
+    </section>
+    <section class="card">
+      <h2>双窗口冲突演练</h2>
+      <p class="hint">模拟窗口 A/B 基于同一 rev 保存：后提交者看到 409 与双方差异。</p>
+      <div class="row wrap">
+        <button id="btn-conflict" class="secondary">制造一次版本冲突</button>
+      </div>
+      <pre id="conflict-view" class="replay"></pre>
+    </section>
+  </aside>
+</main>
+
+<div id="toast" hidden></div>
+<script src="/app.js"></script>
+</body>
+</html>

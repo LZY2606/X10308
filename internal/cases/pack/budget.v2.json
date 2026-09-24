@@ -1,0 +1,6 @@
+{
+  "budget_id": "b-v2-truncated",
+  "budget": "6",
+  "unit": "state",
+  "description": "参数修订：BFS 预算 6，未到 ω 覆盖结论前耗尽，必须 unknown 并保留 frontier"
+}

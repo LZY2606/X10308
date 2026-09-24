@@ -1,0 +1,13 @@
+{
+  "capacity_id": "tf-capacity-v1",
+  "unit": "token",
+  "places": {
+    "p_ready": {"raw": "∞", "unit": "token"},
+    "p_pool": {"raw": "∞", "unit": "token"},
+    "p_buffer": {"raw": "2", "unit": "token"},
+    "p_done": {"raw": "∞", "unit": "token"},
+    "p_guard": {"raw": "1", "unit": "token"},
+    "p_loopctl": {"raw": "1", "unit": "token"},
+    "p_sink": {"raw": "∞", "unit": "token"}
+  }
+}

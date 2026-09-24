@@ -1,0 +1,235 @@
+{
+  "model_id": "tf-tokenflow-net",
+  "name": "令牌流网：获取/缓冲/释放/注入/停止",
+  "places": [
+    {
+      "id": "p_ready",
+      "label": "待处理任务",
+      "x": 120,
+      "y": 90,
+      "capacity": ""
+    },
+    {
+      "id": "p_pool",
+      "label": "可复用资源",
+      "x": 120,
+      "y": 220,
+      "capacity": ""
+    },
+    {
+      "id": "p_buffer",
+      "label": "有界缓冲区",
+      "x": 390,
+      "y": 90,
+      "capacity": ""
+    },
+    {
+      "id": "p_done",
+      "label": "已完成任务",
+      "x": 660,
+      "y": 220,
+      "capacity": ""
+    },
+    {
+      "id": "p_guard",
+      "label": "抑制哨兵",
+      "x": 390,
+      "y": 330,
+      "capacity": ""
+    },
+    {
+      "id": "p_loopctl",
+      "label": "自环控制位",
+      "x": 660,
+      "y": 330,
+      "capacity": ""
+    },
+    {
+      "id": "p_sink",
+      "label": "不可转换坐标示例",
+      "x": "n/a",
+      "y": 440,
+      "capacity": "seven"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t_acquire",
+      "label": "获取资源(并发)",
+      "x": 250,
+      "y": 150
+    },
+    {
+      "id": "t_u_release",
+      "label": "释放资源",
+      "x": 520,
+      "y": 150
+    },
+    {
+      "id": "t_x_inject",
+      "label": "无界注入",
+      "x": 250,
+      "y": 280
+    },
+    {
+      "id": "t_selfloop",
+      "label": "纯自环",
+      "x": 700,
+      "y": 420
+    },
+    {
+      "id": "t_v_stop",
+      "label": "设置抑制哨兵",
+      "x": 400,
+      "y": 420
+    }
+  ],
+  "arcs": [
+    {
+      "id": "a_ready_acq",
+      "from": "p_ready",
+      "to": "t_acquire",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_pool_acq",
+      "from": "p_pool",
+      "to": "t_acquire",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_acq_buffer",
+      "from": "t_acquire",
+      "to": "p_buffer",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_acq_pool",
+      "from": "t_acquire",
+      "to": "p_pool",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_buffer_rel",
+      "from": "p_buffer",
+      "to": "t_u_release",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_pool_rel",
+      "from": "p_pool",
+      "to": "t_u_release",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_rel_done",
+      "from": "t_u_release",
+      "to": "p_done",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_rel_pool",
+      "from": "t_u_release",
+      "to": "p_pool",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_inject_pool",
+      "from": "t_x_inject",
+      "to": "p_pool",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_guard_inject",
+      "from": "p_guard",
+      "to": "t_x_inject",
+      "kind": "inhibitor",
+      "weight": 1
+    },
+    {
+      "id": "a_loop_sl1",
+      "from": "p_loopctl",
+      "to": "t_selfloop",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_sl_loop",
+      "from": "t_selfloop",
+      "to": "p_loopctl",
+      "kind": "normal",
+      "weight": 1
+    },
+    {
+      "id": "a_stop_guard",
+      "from": "t_v_stop",
+      "to": "p_guard",
+      "kind": "normal",
+      "weight": 1
+    }
+  ],
+  "nodes": [
+    {
+      "id": "p_ready",
+      "kind": "place"
+    },
+    {
+      "id": "p_pool",
+      "kind": "place"
+    },
+    {
+      "id": "p_buffer",
+      "kind": "place"
+    },
+    {
+      "id": "p_done",
+      "kind": "place"
+    },
+    {
+      "id": "p_guard",
+      "kind": "place"
+    },
+    {
+      "id": "p_loopctl",
+      "kind": "place"
+    },
+    {
+      "id": "p_sink",
+      "kind": "place"
+    },
+    {
+      "id": "t_acquire",
+      "kind": "transition"
+    },
+    {
+      "id": "t_u_release",
+      "kind": "transition"
+    },
+    {
+      "id": "t_x_inject",
+      "kind": "transition"
+    },
+    {
+      "id": "t_v_stop",
+      "kind": "transition"
+    },
+    {
+      "id": "t_selfloop",
+      "kind": "transition"
+    }
+  ],
+  "annotations": {
+    "domain": "令牌流网：Petri net 可达状态、覆盖关系与反例路径",
+    "coordinate_basis": "svg-user-unit",
+    "token_unit": "token"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "strategy_id": "s-bfs-v1",
+  "order": "bfs",
+  "description": "广度优先：精确可达先得到浅目标与全部最短候选；精确枚举在预算处截断保留 frontier"
+}

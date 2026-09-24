@@ -1,0 +1,66 @@
+{
+  "identity_id": "tf-identity-v1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "p_ready",
+      "kind": "place",
+      "label": "待处理任务"
+    },
+    {
+      "id": "p_pool",
+      "kind": "place",
+      "label": "可复用资源"
+    },
+    {
+      "id": "p_buffer",
+      "kind": "place",
+      "label": "有界缓冲区"
+    },
+    {
+      "id": "p_done",
+      "kind": "place",
+      "label": "已完成任务"
+    },
+    {
+      "id": "p_guard",
+      "kind": "place",
+      "label": "抑制哨兵"
+    },
+    {
+      "id": "p_loopctl",
+      "kind": "place",
+      "label": "自环控制位"
+    },
+    {
+      "id": "p_sink",
+      "kind": "place",
+      "label": "不可转换坐标示例"
+    },
+    {
+      "id": "t_acquire",
+      "kind": "transition",
+      "label": "获取资源(并发)"
+    },
+    {
+      "id": "t_u_release",
+      "kind": "transition",
+      "label": "释放资源"
+    },
+    {
+      "id": "t_x_inject",
+      "kind": "transition",
+      "label": "无界注入"
+    },
+    {
+      "id": "t_v_stop",
+      "kind": "transition",
+      "label": "设置抑制哨兵"
+    },
+    {
+      "id": "t_selfloop",
+      "kind": "transition",
+      "label": "纯自环"
+    }
+  ]
+}

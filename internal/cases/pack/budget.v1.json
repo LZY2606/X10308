@@ -1,0 +1,6 @@
+{
+  "budget_id": "b-v1",
+  "budget": "500",
+  "unit": "state",
+  "description": "基线展开预算 500 state；覆盖树问题可判定，精确枚举在该预算截断并保留 frontier"
+}

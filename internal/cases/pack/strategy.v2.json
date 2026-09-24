@@ -1,0 +1,5 @@
+{
+  "strategy_id": "s-dfs-v2",
+  "order": "dfs",
+  "description": "参数修订：改为深度优先；小预算下沿单一分支下钻，无界目标在耗尽预算时 unknown 并保留 frontier"
+}

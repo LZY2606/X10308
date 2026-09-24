@@ -1,0 +1,14 @@
+{
+  "marking_id": "m0-baseline",
+  "label": "基线初始 marking（同图不同 marking 的第一种）",
+  "unit": "token",
+  "tokens": [
+    {"place": "p_ready", "raw": "2", "unit": "token"},
+    {"place": "p_pool", "raw": "3", "unit": "token"},
+    {"place": "p_buffer", "raw": "0", "unit": "token"},
+    {"place": "p_done", "raw": "0", "unit": "token"},
+    {"place": "p_guard", "raw": "0", "unit": "token"},
+    {"place": "p_loopctl", "raw": "1", "unit": "token"},
+    {"place": "p_sink", "raw": "0", "unit": "token"}
+  ]
+}

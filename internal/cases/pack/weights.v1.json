@@ -1,0 +1,58 @@
+{
+  "weights_id": "tf-weights-v1",
+  "unit": "token",
+  "arcs": {
+    "a_ready_acq": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_pool_acq": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_acq_buffer": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_acq_pool": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_buffer_rel": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_pool_rel": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_rel_done": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_rel_pool": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_inject_pool": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_guard_inject": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_loop_sl1": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_sl_loop": {
+      "raw": "1",
+      "unit": "token"
+    },
+    "a_stop_guard": {
+      "raw": "1",
+      "unit": "token"
+    }
+  }
+}
